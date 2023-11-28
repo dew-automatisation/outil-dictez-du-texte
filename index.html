@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcription en temps réel avec Google Chrome</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f4f4f4;
+        }
+
+        #controls {
+            margin: 20px 0;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 20px;
+            box-sizing: border-box;
+            min-height: 200px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+
+<body>
+    <h1>Transcription en temps réel</h1>
+
+    <div id="controls">
+        <button id="startButton">Démarrer</button>
+        <button id="stopButton">Arrêter</button>
+    </div>
+
+    <textarea id="transcriptionOutput" placeholder="La transcription apparaîtra ici..."></textarea>
+
+    <script>
+        let recognition;
+        let running = false;
+
+        // Vérifier si la reconnaissance vocale est supportée
+        if ('webkitSpeechRecognition' in window) {
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onstart = function () {
+                running = true;
+            };
+
+            recognition.onresult = function (event) {
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    }
+                }
+                // Ajoute la nouvelle transcription à la fin du texte précédent
+                document.getElementById('transcriptionOutput').value += finalTranscript;
+            };
+
+            recognition.onerror = function (event) {
+                console.log('Erreur de reconnaissance vocale: ' + event.error);
+            };
+
+            recognition.onend = function () {
+                running = false;
+            };
+        }
+
+        document.getElementById('startButton').addEventListener('click', function () {
+            if (!running) {
+                recognition.start();
+            }
+        });
+
+        document.getElementById('stopButton').addEventListener('click', function () {
+            if (running) {
+                recognition.stop();
+            }
+        });
+    </script>
+</body>
+
+</html>
